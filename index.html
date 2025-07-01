@@ -1,0 +1,29 @@
+<button id="likeBtn">❤️ אהבתי (<span id="likeCount">0</span>)</button>
+
+<script>
+const namespace = "your-site-name"; // אפשר כל שם
+const key = "like-counter";
+
+const likeBtn = document.getElementById('likeBtn');
+const likeCount = document.getElementById('likeCount');
+
+fetch(`https://api.countapi.xyz/get/${namespace}/${key}`)
+  .then(res => res.json())
+  .then(data => likeCount.textContent = data.value);
+
+if (!localStorage.getItem('hasLiked')) {
+  likeBtn.addEventListener('click', () => {
+    fetch(`https://api.countapi.xyz/hit/${namespace}/${key}`)
+      .then(res => res.json())
+      .then(data => {
+        likeCount.textContent = data.value;
+        localStorage.setItem('hasLiked', true);
+        likeBtn.disabled = true;
+        likeBtn.textContent = `❤️ אהבת כבר (${data.value})`;
+      });
+  });
+} else {
+  likeBtn.disabled = true;
+  likeBtn.textContent = `❤️ אהבת כבר`;
+}
+</script>
