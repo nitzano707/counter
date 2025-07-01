@@ -4,49 +4,69 @@
   <meta charset="UTF-8">
   <title>כפתור לייק עם CounterAPI</title>
   <style>
-    body { direction: rtl; text-align: center; font-family: sans-serif; margin-top: 50px; }
-    button { font-size: 22px; padding: 10px 20px; }
+    body {
+      direction: rtl;
+      text-align: center;
+      font-family: sans-serif;
+      margin-top: 50px;
+    }
+    button {
+      font-size: 22px;
+      padding: 10px 20px;
+    }
   </style>
 </head>
 <body>
   <button id="likeBtn">❤️ אהבתי (<span id="likeCount">0</span>)</button>
 
   <script>
+    const token = "ut_tUDKJaGgBPZn1UKQioAC1UqNoa0GUB6fy7Iqswld"; // מותר לפי התיעוד
     const namespace = "nitzano707";
     const key = "like-counter";
-    const baseUrl = "https://counterapi.dev/api/v2/counter";
+    const apiBase = "https://counterapi.dev/api/v2/counter";
 
     const likeBtn = document.getElementById('likeBtn');
     const likeCount = document.getElementById('likeCount');
 
     // שליפת מונה קיים
-    fetch(`${baseUrl}/${namespace}/${key}`)
-      .then(res => res.json())
-      .then(data => {
-        likeCount.textContent = data.value;
-        if (localStorage.getItem(`${namespace}_${key}_liked`)) {
-          likeBtn.disabled = true;
-          likeBtn.textContent = `❤️ אהבת כבר (${data.value})`;
-        }
-      })
-      .catch(err => {
-        console.error("שגיאה בשליפת המונה:", err);
-      });
+    fetch(`${apiBase}/${namespace}/${key}`, {
+      headers: {
+        "Authorization": `Bearer ${token}`
+      }
+    })
+    .then(res => res.json())
+    .then(data => {
+      likeCount.textContent = data.value;
+      if (localStorage.getItem(`${namespace}_${key}_liked`)) {
+        likeBtn.disabled = true;
+        likeBtn.textContent = `❤️ אהבת כבר (${data.value})`;
+      }
+    })
+    .catch(err => {
+      console.error("שגיאה בשליפת המונה:", err);
+      likeBtn.textContent = "🚫 שגיאה";
+    });
 
     // בעת לחיצה
     likeBtn.addEventListener('click', () => {
       if (!localStorage.getItem(`${namespace}_${key}_liked`)) {
-        fetch(`${baseUrl}/${namespace}/${key}/increment`, { method: "POST" })
-          .then(res => res.json())
-          .then(data => {
-            likeCount.textContent = data.value;
-            localStorage.setItem(`${namespace}_${key}_liked`, true);
-            likeBtn.disabled = true;
-            likeBtn.textContent = `❤️ אהבת כבר (${data.value})`;
-          })
-          .catch(err => {
-            console.error("שגיאה בהעלאת הלייק:", err);
-          });
+        fetch(`${apiBase}/${namespace}/${key}/increment`, {
+          method: "POST",
+          headers: {
+            "Authorization": `Bearer ${token}`,
+            "Content-Type": "application/json"
+          }
+        })
+        .then(res => res.json())
+        .then(data => {
+          likeCount.textContent = data.value;
+          localStorage.setItem(`${namespace}_${key}_liked`, true);
+          likeBtn.disabled = true;
+          likeBtn.textContent = `❤️ אהבת כבר (${data.value})`;
+        })
+        .catch(err => {
+          console.error("שגיאה בלחיצה:", err);
+        });
       }
     });
   </script>
