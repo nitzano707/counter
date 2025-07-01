@@ -2,33 +2,25 @@
 <html lang="he">
 <head>
   <meta charset="UTF-8">
-  <title>כפתור לייק</title>
+  <title>כפתור לייק עם CounterAPI</title>
   <style>
-    body {
-      direction: rtl;
-      font-family: sans-serif;
-      text-align: center;
-      margin-top: 50px;
-    }
-    button {
-      font-size: 22px;
-      padding: 10px 20px;
-      cursor: pointer;
-    }
+    body { direction: rtl; text-align: center; font-family: sans-serif; margin-top: 50px; }
+    button { font-size: 22px; padding: 10px 20px; }
   </style>
 </head>
 <body>
   <button id="likeBtn">❤️ אהבתי (<span id="likeCount">0</span>)</button>
 
   <script>
-    const namespace = "nitzano707"; // השם שלך באתר
+    const namespace = "nitzano707";
     const key = "like-counter";
+    const baseUrl = "https://counterapi.dev/api/v2/counter";
 
     const likeBtn = document.getElementById('likeBtn');
     const likeCount = document.getElementById('likeCount');
 
-    // שליפת המונה
-    fetch(`https://api.countapi.xyz/get/${namespace}/${key}`)
+    // שליפת מונה קיים
+    fetch(`${baseUrl}/${namespace}/${key}`)
       .then(res => res.json())
       .then(data => {
         likeCount.textContent = data.value;
@@ -39,13 +31,12 @@
       })
       .catch(err => {
         console.error("שגיאה בשליפת המונה:", err);
-        likeBtn.textContent = "🚫 שגיאה בטעינה";
       });
 
     // בעת לחיצה
     likeBtn.addEventListener('click', () => {
       if (!localStorage.getItem(`${namespace}_${key}_liked`)) {
-        fetch(`https://api.countapi.xyz/hit/${namespace}/${key}`)
+        fetch(`${baseUrl}/${namespace}/${key}/increment`, { method: "POST" })
           .then(res => res.json())
           .then(data => {
             likeCount.textContent = data.value;
@@ -54,7 +45,7 @@
             likeBtn.textContent = `❤️ אהבת כבר (${data.value})`;
           })
           .catch(err => {
-            console.error("שגיאה בעת הלחיצה:", err);
+            console.error("שגיאה בהעלאת הלייק:", err);
           });
       }
     });
