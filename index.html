@@ -1,29 +1,51 @@
-<button id="likeBtn">❤️ אהבתי (<span id="likeCount">0</span>)</button>
+<!DOCTYPE html>
+<html lang="he">
+<head>
+  <meta charset="UTF-8">
+  <title>כפתור לייק</title>
+</head>
+<body style="direction: rtl; font-family: sans-serif; text-align: center; margin-top: 50px;">
 
-<script>
-const namespace = "your-site-name"; // אפשר כל שם
-const key = "like-counter";
+  <button id="likeBtn" style="font-size: 20px;">❤️ אהבתי (<span id="likeCount">0</span>)</button>
 
-const likeBtn = document.getElementById('likeBtn');
-const likeCount = document.getElementById('likeCount');
+  <script>
+    const namespace = "nitzan707"; // שים לב: שם ייחודי שלך
+    const key = "like-counter";    // שם המונה
 
-fetch(`https://api.countapi.xyz/get/${namespace}/${key}`)
-  .then(res => res.json())
-  .then(data => likeCount.textContent = data.value);
+    const likeBtn = document.getElementById('likeBtn');
+    const likeCount = document.getElementById('likeCount');
 
-if (!localStorage.getItem('hasLiked')) {
-  likeBtn.addEventListener('click', () => {
-    fetch(`https://api.countapi.xyz/hit/${namespace}/${key}`)
+    // שליפת מונה נוכחי
+    fetch(`https://api.countapi.xyz/get/${namespace}/${key}`)
       .then(res => res.json())
       .then(data => {
         likeCount.textContent = data.value;
-        localStorage.setItem('hasLiked', true);
-        likeBtn.disabled = true;
-        likeBtn.textContent = `❤️ אהבת כבר (${data.value})`;
+        if (localStorage.getItem(`${namespace}_${key}_liked`)) {
+          likeBtn.disabled = true;
+          likeBtn.textContent = `❤️ אהבת כבר (${data.value})`;
+        }
+      })
+      .catch(err => {
+        console.error("שגיאה בשליפת המונה:", err);
       });
-  });
-} else {
-  likeBtn.disabled = true;
-  likeBtn.textContent = `❤️ אהבת כבר`;
-}
-</script>
+
+    // לחיצה על כפתור
+    likeBtn.addEventListener('click', () => {
+      if (!localStorage.getItem(`${namespace}_${key}_liked`)) {
+        fetch(`https://api.countapi.xyz/hit/${namespace}/${key}`)
+          .then(res => res.json())
+          .then(data => {
+            likeCount.textContent = data.value;
+            localStorage.setItem(`${namespace}_${key}_liked`, true);
+            likeBtn.disabled = true;
+            likeBtn.textContent = `❤️ אהבת כבר (${data.value})`;
+          })
+          .catch(err => {
+            console.error("שגיאה בעת שליחת הלייק:", err);
+          });
+      }
+    });
+  </script>
+
+</body>
+</html>
